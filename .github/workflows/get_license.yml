@@ -4,26 +4,27 @@ on: workflow_dispatch
 
 jobs:
   activation:
-    name: Request Activation File (.alf)
+    name: Generate .alf file via Docker 🐳
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          lfs: true
 
-      - name: Request activation file
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_LICENSE: "" # දැනට හිස්ව තබන්න
-        with:
-          versioning: None
-          # මේක තමයි අලුත් ක්‍රමය
-          customParameters: -createManualActivationFile -batchmode -nographics
+      - name: Generate Activation File
+        # මෙතනින් කරන්නේ Unity එකට ලයිසන් නැතිව ඇතුල් වෙලා .alf එක හදන එක
+        run: |
+          docker run --rm \
+            -v "$(pwd):/project" \
+            unityci/editor:ubuntu-2022.3.0f1-base-3 \
+            unity-editor \
+              -batchmode \
+              -nographics \
+              -createManualActivationFile \
+              -logfile /dev/stdout \
+              -projectPath /project
 
       - name: Upload ALF
         uses: actions/upload-artifact@v4
         with:
           name: Unity-Activation-File
-          # ALF file එක සාමාන්‍යයෙන් හැදෙන්නේ project root එකේ
-          path: "**/*.alf"
+          path: ./*.alf
