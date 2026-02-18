@@ -22,10 +22,11 @@ jobs:
         with:
           targetPlatform: StandaloneWindows64
           unityVersion: 2022.3.0f1
-          unityLicensingServer: "" # Personal license නිසා මේක හිස්ව තියන්න
+          # Personal license එකක් පාවිච්චි කරන නිසා මෙය හිස්ව තැබීම අනිවාර්යයි
+          unityLicensingServer: "" 
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Windows-App-Build
+          name: My-Windows-Build
           path: build/StandaloneWindows64
