@@ -1,0 +1,25 @@
+name: Build Windows App 💻
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Build Windows
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          targetPlatform: StandaloneWindows64 # Windows 64-bit සඳහා
+          
+      - name: Upload Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Sample-App
+          path: build/StandaloneWindows64
