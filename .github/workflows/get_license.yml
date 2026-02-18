@@ -1,37 +1,16 @@
-name: Get Unity License 🔑
-
-on: workflow_dispatch
-
+name: Build Android APK 📱
+on: [push, workflow_dispatch]
 jobs:
-  activation:
-    name: Generate .alf file
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Create ALF File
-        run: |
-          # වැඩ කරන තැන ලකුණු කරගන්න
-          PROJECT_PATH=$(pwd)
-          
-          # Docker එක ඇතුළේ කෙලින්ම Project folder එකට .alf එක හදන්න කියනවා
-          docker run --rm \
-            -v "$PROJECT_PATH:/project" \
-            unityci/editor:ubuntu-2022.3.0f1-base-3 \
-            unity-editor \
-              -batchmode \
-              -nographics \
-              -createManualActivationFile \
-              -logfile /dev/stdout \
-              -projectPath /project
-          
-          # වැඩේ හරියට වුණාද බලන්න සහ Permission හදන්න
-          sudo chmod -R 777 .
-          ls -lh *.alf || echo "Still not found in root"
-
-      - name: Upload ALF
-        uses: actions/upload-artifact@v4
+      - uses: actions/checkout@v4
+      - uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          name: Unity-Activation-File
-          path: ./*.alf
+          targetPlatform: Android
+      - uses: actions/upload-artifact@v4
+        with:
+          name: APK-File
+          path: build/Android
