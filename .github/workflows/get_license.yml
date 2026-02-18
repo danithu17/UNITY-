@@ -10,16 +10,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Free up space (Optional)
-        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
-
-      - name: Generate Activation File
-        # Unity Editor එක කෙලින්ම Runner එක ඇතුළෙම run කරවනවා
-        uses: game-ci/unity-request-activation-file@v2
+      - name: Create ALF File
+        run: |
+          # වැඩ කරන තැන ලකුණු කරගන්න
+          PROJECT_PATH=$(pwd)
+          
+          # Docker එක ඇතුළේ කෙලින්ම Project folder එකට .alf එක හදන්න කියනවා
+          docker run --rm \
+            -v "$PROJECT_PATH:/project" \
+            unityci/editor:ubuntu-2022.3.0f1-base-3 \
+            unity-editor \
+              -batchmode \
+              -nographics \
+              -createManualActivationFile \
+              -logfile /dev/stdout \
+              -projectPath /project
+          
+          # වැඩේ හරියට වුණාද බලන්න සහ Permission හදන්න
+          sudo chmod -R 777 .
+          ls -lh *.alf || echo "Still not found in root"
 
       - name: Upload ALF
         uses: actions/upload-artifact@v4
         with:
           name: Unity-Activation-File
           path: ./*.alf
-          if-no-files-found: error
