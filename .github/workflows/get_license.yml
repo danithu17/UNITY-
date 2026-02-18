@@ -12,9 +12,10 @@ jobs:
 
       - name: Generate Activation File
         run: |
-          # Folder එකට පූර්ණ අවසර ලබා දීම
-          chmod -R 777 $(pwd)
+          # වැඩ කරන folder එකට අවසර දීම
+          sudo chmod -R 777 $(pwd)
           
+          # Docker එක run කරලා බලෙන් .alf එකක් හදවනවා
           docker run --rm \
             -v "$(pwd):/project" \
             -e "HOME=/tmp" \
@@ -24,17 +25,19 @@ jobs:
               -nographics \
               -createManualActivationFile \
               -logfile /dev/stdout \
-              -projectPath /project
+              -projectPath /project || true
           
-          # ඇත්තටම file එක හැදුණාද කියලා check කරලා බලන්න
-          ls -R
+          # දැන් මුළු system එකේම තියෙන .alf files හොයලා අපේ current folder එකට කොපි කරනවා
+          echo "Searching for .alf files..."
+          find / -name "*.alf" 2>/dev/null -exec cp {} . \; || true
           
-          # Root permissions අයින් කරලා සාමාන්‍ය කෙනෙකුට ගන්න පුළුවන් විදිහට හැදීම
-          sudo chmod -R 777 $(pwd)
+          # Permission ආයෙත් හදනවා upload කරන්න පුළුවන් වෙන්න
+          sudo chmod -R 777 .
 
       - name: Upload ALF
         uses: actions/upload-artifact@v4
         with:
           name: Unity-Activation-File
-          # මෙතන අපි search කරනවා ඕනෑම තැනක .alf එකක් තියෙනවාද කියලා
-          path: "**/*.alf"
+          # දැන් අපි කෙලින්ම අපේ folder එකේ තියෙන ඕනෑම .alf එකක් ගන්නවා
+          path: "./*.alf"
+          if-no-files-found: error
