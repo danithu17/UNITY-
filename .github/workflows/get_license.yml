@@ -9,12 +9,21 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Request activation file
-        uses: game-ci/unity-request-activation-file@v2
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: "" # දැනට හිස්ව තබන්න
+        with:
+          versioning: None
+          # මේක තමයි අලුත් ක්‍රමය
+          customParameters: -createManualActivationFile -batchmode -nographics
 
       - name: Upload ALF
         uses: actions/upload-artifact@v4
         with:
           name: Unity-Activation-File
-          path: ./*.alf
+          # ALF file එක සාමාන්‍යයෙන් හැදෙන්නේ project root එකේ
+          path: "**/*.alf"
