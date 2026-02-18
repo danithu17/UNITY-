@@ -4,40 +4,22 @@ on: workflow_dispatch
 
 jobs:
   activation:
-    name: Generate .alf file via Docker 🐳
+    name: Generate .alf file
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Free up space (Optional)
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+
       - name: Generate Activation File
-        run: |
-          # වැඩ කරන folder එකට අවසර දීම
-          sudo chmod -R 777 $(pwd)
-          
-          # Docker එක run කරලා බලෙන් .alf එකක් හදවනවා
-          docker run --rm \
-            -v "$(pwd):/project" \
-            -e "HOME=/tmp" \
-            unityci/editor:ubuntu-2022.3.0f1-base-3 \
-            unity-editor \
-              -batchmode \
-              -nographics \
-              -createManualActivationFile \
-              -logfile /dev/stdout \
-              -projectPath /project || true
-          
-          # දැන් මුළු system එකේම තියෙන .alf files හොයලා අපේ current folder එකට කොපි කරනවා
-          echo "Searching for .alf files..."
-          find / -name "*.alf" 2>/dev/null -exec cp {} . \; || true
-          
-          # Permission ආයෙත් හදනවා upload කරන්න පුළුවන් වෙන්න
-          sudo chmod -R 777 .
+        # Unity Editor එක කෙලින්ම Runner එක ඇතුළෙම run කරවනවා
+        uses: game-ci/unity-request-activation-file@v2
 
       - name: Upload ALF
         uses: actions/upload-artifact@v4
         with:
           name: Unity-Activation-File
-          # දැන් අපි කෙලින්ම අපේ folder එකේ තියෙන ඕනෑම .alf එකක් ගන්නවා
-          path: "./*.alf"
+          path: ./*.alf
           if-no-files-found: error
